@@ -115,6 +115,15 @@ def main():
     try:
         # Create Qt application
         app = QApplication(sys.argv)
+        app.setStyleSheet("""
+            QMessageBox {
+                background-color: #1A1F2B;
+            }
+            QMessageBox QLabel {
+                color: #EAEFF7;
+                background-color: transparent;
+            }
+        """)
         
         # Show setup dialog and keep reference to prevent garbage collection
         setup_dialog = SetupDialog()

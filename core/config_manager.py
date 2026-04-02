@@ -50,7 +50,7 @@ class ConfigManager:
         },
 
         'general': {
-            'auto_check_updates': True,
+            'auto_check_updates': False,
             'save_reports': True,
             'log_level': 'INFO',
         }

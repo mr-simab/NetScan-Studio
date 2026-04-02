@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 from utils.logger import get_logger
 import re
+import shlex
 
 logger = get_logger("CommandBuilder")
 
@@ -172,11 +173,7 @@ class NmapCommandBuilder:
     # ---------------------------
     # BUILD COMMAND
     # ---------------------------
-    def build_command(self) -> str:
-        cmd_parts = ['nmap']
-
-        cmd_parts.append(self.target)
-
+    def _ordered_components(self) -> List[str]:
         order = [
             'ipv6',
             'scan_type',
@@ -195,10 +192,21 @@ class NmapCommandBuilder:
             'output'
         ]
 
+        ordered_components = []
         for comp in order:
             val = self.components.get(comp)
             if val:
-                cmd_parts.append(val)
+                ordered_components.append(val)
+
+        return ordered_components
+
+    def build_args(self) -> str:
+        return ' '.join(self._ordered_components())
+
+    def build_command(self) -> str:
+        cmd_parts = ['nmap']
+        cmd_parts.extend(self._ordered_components())
+        cmd_parts.append(self.target)
 
         return ' '.join(cmd_parts)
 
@@ -230,10 +238,34 @@ class CommandParser:
             'ipv6': False,
         }
 
-        # Target
-        match = re.search(r'nmap\s+(?:[^\s]+\s+)*([^\s]+)$', command)
-        if match:
-            config['target'] = match.group(1)
+        try:
+            tokens = shlex.split(command)
+        except ValueError:
+            tokens = command.split()
+
+        if not tokens or tokens[0] != 'nmap':
+            return config
+
+        option_tokens = {'nmap'}
+        option_tokens.update(NmapCommandBuilder.SCAN_TYPES.values())
+        option_tokens.update(filter(None, NmapCommandBuilder.HOST_DISCOVERY.values()))
+        option_tokens.update(filter(None, NmapCommandBuilder.TIMING_TEMPLATES.values()))
+        option_tokens.update(filter(None, NmapCommandBuilder.PORT_STRATEGY.values()))
+        option_tokens.update(filter(None, NmapCommandBuilder.VERBOSITY.values()))
+        option_tokens.update(['-sV', '-O', '-A', '-f', '-6'])
+
+        value_flags = {'-p', '--top-ports', '--script', '-oN', '-oX', '-oG', '-oA', '--data-length', '-D'}
+        idx = 1
+        while idx < len(tokens):
+            token = tokens[idx]
+            if token in value_flags:
+                idx += 2
+                continue
+            if token.startswith('-') or token in option_tokens:
+                idx += 1
+                continue
+            config['target'] = token
+            idx += 1
 
         # Scan Types
         for name, flag in NmapCommandBuilder.SCAN_TYPES.items():
@@ -245,6 +277,10 @@ class CommandParser:
             config['host_discovery'] = 'Skip Ping'
         elif '-sn' in command:
             config['host_discovery'] = 'Ping Scan Only'
+        elif '-PS' in command:
+            config['host_discovery'] = 'TCP SYN'
+        elif '-PA' in command:
+            config['host_discovery'] = 'TCP ACK'
 
         # Flags
         config['version_detection'] = '-sV' in command
@@ -261,8 +297,25 @@ class CommandParser:
         # Port Strategy
         if '-F' in command:
             config['port_strategy'] = 'Fast Scan'
-        elif '--top-ports' in command:
-            config['port_strategy'] = 'Top Ports'
+        else:
+            top_ports_match = re.search(r'--top-ports\s+(\d+)', command)
+            if top_ports_match:
+                top_ports = top_ports_match.group(1)
+                if top_ports == '100':
+                    config['port_strategy'] = 'Top 100'
+                elif top_ports == '1000':
+                    config['port_strategy'] = 'Top 1000'
+                else:
+                    config['port_strategy'] = f'Top {top_ports}'
+
+        if '-v' in tokens:
+            config['verbosity'] = 'Verbose'
+        elif '-vv' in tokens:
+            config['verbosity'] = 'Very Verbose'
+        elif '-d' in tokens:
+            config['verbosity'] = 'Debug'
+        else:
+            config['verbosity'] = 'Normal'
 
         # Ports
         port_match = re.search(r'-p\s+([^\s]+)', command)

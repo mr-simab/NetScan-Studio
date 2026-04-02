@@ -1,7 +1,8 @@
 from typing import List, Optional
 from .base_engine import BaseScanEngine, ScanResult, ScanState
-from utils import ValidationHelper
+from utils import ValidationHelper, PortHelper
 from utils.logger import get_logger
+from setup import platform_detector
 
 logger = get_logger("ScapyEngine")
 
@@ -39,6 +40,13 @@ class ScapyEngine(BaseScanEngine):
         if not self.scapy_available:
             self.state = ScanState.FAILED
             self.queue_error("Scapy not installed")
+            return []
+
+        if not platform_detector.supports_raw_packet_scans():
+            self.state = ScanState.FAILED
+            self.queue_error(
+                f"Scapy analysis requires administrator/root privileges on {platform_detector.get_platform_label()}"
+            )
             return []
 
         # Resolve target
@@ -79,8 +87,9 @@ class ScapyEngine(BaseScanEngine):
     def _analyze_ttl(self, ip: str):
         """Analyze TTL patterns for OS fingerprinting"""
         self.queue_log("[Scapy] TTL analysis started")
+        total = len(self.ports) or 1
 
-        for port in self.ports:
+        for idx, port in enumerate(self.ports, start=1):
             if self._stop_event.is_set():
                 break
 
@@ -105,11 +114,22 @@ class ScapyEngine(BaseScanEngine):
                     "ttl": ttl,
                     "os_hint": os_type
                 })
+                self.results.append(
+                    ScanResult(
+                        port=port,
+                        service=PortHelper.get_service_name(port),
+                        state="analyzed",
+                        version=f"TTL={ttl}",
+                        info=f"OS hint: {os_type}"
+                    )
+                )
 
                 self.queue_log(f"[TTL] Port {port}: TTL={ttl} → {os_type}")
 
             except Exception as e:
                 self.queue_error(f"TTL error (port {port}): {e}")
+            finally:
+                self.queue_progress(idx, total)
 
     # ---------------- FIREWALL DETECTION ----------------
     def _detect_firewall(self, ip: str):
@@ -133,6 +153,15 @@ class ScapyEngine(BaseScanEngine):
                 self.queue_log("[Firewall] Unusual response → possible firewall")
 
             self.queue_result("firewall_detection", result)
+            self.results.append(
+                ScanResult(
+                    port=80,
+                    service=PortHelper.get_service_name(80),
+                    state="filtered" if result.get("detected") else "reachable",
+                    info=result.get("type", "No firewall detected")
+                )
+            )
+            self.queue_progress(1, 1)
 
         except Exception as e:
             self.queue_error(f"Firewall detection error: {e}")
@@ -141,8 +170,9 @@ class ScapyEngine(BaseScanEngine):
     def _craft_packets(self, ip: str):
         """Send crafted packets and analyze responses"""
         self.queue_log("[Scapy] Packet crafting started")
+        total = len(self.ports) or 1
 
-        for port in self.ports:
+        for idx, port in enumerate(self.ports, start=1):
             if self._stop_event.is_set():
                 break
 
@@ -157,8 +187,19 @@ class ScapyEngine(BaseScanEngine):
                         "port": port,
                         "response": resp_type
                     })
+                    self.results.append(
+                        ScanResult(
+                            port=port,
+                            service=PortHelper.get_service_name(port),
+                            state="responded",
+                            version=resp_type,
+                            info="Scapy crafted packet response"
+                        )
+                    )
 
                     self.queue_log(f"[Packet] {ip}:{port} → {resp_type}")
 
             except Exception as e:
                 self.queue_error(f"Packet error (port {port}): {e}")
+            finally:
+                self.queue_progress(idx, total)

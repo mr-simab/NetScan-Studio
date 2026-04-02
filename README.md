@@ -1,276 +1,290 @@
-#  NetScan Studio
+# NetScan Studio
 
-**Scan smarter. Analyze deeper.**
+NetScan Studio is a desktop network scanning application built with Python and PyQt5. It combines Socket, Nmap, and Scapy based workflows behind one GUI, with live progress, command preview, configurable scan modes, and exportable reports.
 
-A comprehensive, intelligent network scanning platform with multi-engine support and professional reporting.
+## Preview
 
----
+![NetScan Studio UI](https://github.com/user-attachments/assets/f98bebcc-7fd7-4ac7-8e45-972e4fbd69a7)
 
-##  Overview
 
-NetScan Studio is a GUI-based network scanner that combines multiple scanning engines (Socket, Nmap, Scapy) into a single intuitive application. It features intelligent tool recommendation, dynamic configuration, and professional reporting capabilities.
+## Highlights
 
-**Version:** 1.0.0  
-**Author:** Mr.Sima  
-**License:** MIT
+- Works across Windows, Linux, Kali Linux, and macOS.
+- Supports `Quick`, `Standard`, and `Deep` scan modes.
+- Uses Socket, Nmap, Scapy, or Hybrid execution depending on the selected mode/tool.
+- Keeps the command preview aligned with the actual scan configuration.
+- Shows live scan progress, status text, elapsed time, and state-aware progress colors.
+- Exports reports in `TXT`, `JSON`, and `CSV`.
+- Stores config, logs, and generated reports in platform-appropriate user directories instead of cluttering the repo.
 
----
+## Platform Compatibility
 
-##  Features
+NetScan Studio is designed to run on:
 
-### Core Scanning
-- **Multi-Engine Support:** Socket (fast), Nmap (detailed), Scapy (advanced)
-- **3-Tier Scan Modes:** Quick, Standard, Deep
-- **Intelligent Tool Recommendation:** Auto-selects best tool per mode
-- **Dynamic Configuration:** Context-aware UI options
+- Windows 10/11
+- Linux distributions such as Ubuntu, Debian, Kali Linux, Fedora, Arch
+- macOS
 
-### Advanced Capabilities
-- **Nmap Integration:**
-  - Scan types (-sT, -sS, -sA, etc.)
-  - Host discovery options (-Pn, -sn)
-  - Service detection (-sV)
-  - Script engine with categories
-  
-- **Command Intelligence:** 
-  - Live command preview
-  - Bidirectional UI ↔ Command sync
-  - Manual command editing
+Some scan capabilities depend on system privileges:
 
-- **Professional Reporting:**
-  - Scan configuration summary
-  - Structured results
-  - Executive insights
-  - Export formats: TXT, JSON, CSV
+- `TCP Connect` scans work without elevated privileges on all supported platforms.
+- Raw packet based scans such as `SYN`, `ACK`, `FIN`, `UDP`, and Scapy analysis typically require administrator/root privileges.
+- If a raw Nmap scan type is selected without the needed privileges, NetScan Studio safely falls back to `TCP Connect` and shows a compatibility note in the UI.
+- Scapy analysis requires elevated privileges and compatible packet capture support on the host OS.
 
-### Insights Engine
-- Intelligent risk assessment
-- Security recommendations
-- Service-specific analysis
+## Requirements
 
-### Cross-Platform
-- Automatic OS detection (Windows/Linux/macOS)
-- Platform-specific dependency management
-- Guided installation process
+- Python `3.9+`
+- `PyQt5`
+- `Nmap` installed for Nmap and Hybrid scanning
+- Administrator/root privileges for raw packet scan types and Scapy features
 
-### Update Management
-- GitHub-connected version checking
-- Auto-notification system
-- One-click update access
+## Installation
 
----
+1. Clone or extract the project.
+2. Open a terminal in the project directory:
 
-## 📦 Installation
-
-### Prerequisites
-- Python 3.7+
-- PyQt5
-- Nmap (for full functionality)
-
-### Quick Start
-
-1. **Clone/Extract Project**
 ```bash
 cd netscan_studio
 ```
 
-2. **Install Python Dependencies**
+3. Install Python dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Install Nmap** (if not installed)
+4. Install Nmap for your platform.
 
-**Windows:**
-- Download from https://nmap.org/download.html
-- Run installer and add to PATH
+### Windows
 
-**Linux (Ubuntu/Debian):**
+1. Download Nmap from `https://nmap.org/download.html`.
+2. During installation, allow Npcap installation if prompted.
+3. Make sure `nmap.exe` is available in `PATH`.
+
+Common location:
+
+```text
+C:\Program Files\Nmap\nmap.exe
+```
+
+### Ubuntu / Debian / Kali Linux
+
 ```bash
+sudo apt update
 sudo apt install nmap
 ```
 
-**macOS:**
+### Fedora
+
+```bash
+sudo dnf install nmap
+```
+
+### Arch Linux
+
+```bash
+sudo pacman -S nmap
+```
+
+### macOS
+
+With Homebrew:
+
 ```bash
 brew install nmap
 ```
 
-4. **Run Application**
+## Running The App
+
 ```bash
 python main.py
 ```
 
----
+## Using NetScan Studio
 
-##  Usage Guide
+1. Enter a target such as an IP address or hostname.
+2. Choose a scan mode:
+   Quick: fast checks, lightweight.
+   Standard: balanced Nmap-based scan.
+   Deep: broader analysis with advanced features.
+3. Review or change the recommended tool.
+4. Adjust scan options such as ports, service detection, or scan type.
+5. Start the scan and watch the live status section update.
+6. Export the results if needed.
 
-### Basic Scanning
+## Scan Engines
 
-1. **Enter Target**
-   - IP address (e.g., 192.168.1.1)
-   - Hostname (e.g., example.com)
+### Socket
 
-2. **Select Scan Mode**
-   - **Quick:** Fast socket-based scan (~30 seconds)
-   - **Standard:** Detailed Nmap scan (~2-5 minutes)
-   - **Deep:** Multi-engine analysis (~5-10 minutes)
+- Fast and lightweight
+- Good for quick checks and common port validation
+- No external Nmap dependency required
 
-3. **Choose Tool** (Auto-selected based on mode)
-   - Socket (fast checks)
-   - Nmap (detailed scanning)
-   - Scapy (packet analysis)
+### Nmap
 
-4. **Advanced Options** (Optional)
-   - Scan type (-sS, -sT, etc.)
-   - Service detection
-   - Nmap scripts
-   - Port ranges
+- Best for detailed host and service scanning
+- Supports scan type, service detection, OS detection, host discovery, and scripts
+- Used in Standard mode by default
 
-5. **Start Scan & View Results**
-   - Real-time progress
-   - Open ports table
-   - Insights & recommendations
-   - Professional report
+### Scapy
 
-### Exporting Results
+- Used for advanced packet-level analysis
+- Best suited for elevated environments
+- Used in Deep mode when available and appropriate
 
-Export scan results in multiple formats:
-- **TXT:** Human-readable report
-- **JSON:** Machine-readable structure
-- **CSV:** Spreadsheet-compatible
+### Hybrid
 
----
+- Combines fast checks and deeper follow-up scanning
+- Useful when you want quick visibility plus richer details
 
-## 🏗️ Architecture
+## Progress And Status
 
-```
-UI Layer (PyQt5 GUI)
-        ↓
-Controller Layer (ScannerManager)
-        ↓
-Scanner Manager (Pipeline Engine)
-        ↓
-┌────────────┬────────────┬────────────┐
-│   Socket   │   Nmap     │   Scapy    │
-│   Engine   │   Engine   │   Engine   │
-└────────────┴────────────┴────────────┘
-        ↓
-Processing (Insights + Parser)
-        ↓
-Output (Reports + UI)
-```
+The status section now reports:
 
----
+- Live percentage updates while scanning
+- Intermediate progress counts
+- Elapsed time during the scan
+- Color-coded progress states
 
-## 📁 Project Structure
+Progress color meaning:
 
-```
-netscan_studio/
-├── main.py                 # Entry point
-├── ui/
-│   ├── main_window.py     # PyQt5 GUI
-│   └── components/        # UI components
-├── core/
-│   ├── scanner_manager.py # Main orchestrator
-│   └── config_manager.py  # Configuration
-├── engines/
-│   ├── socket_engine.py   # Fast scanning
-│   ├── nmap_engine.py     # Full scanning
-│   └── scapy_engine.py    # Advanced analysis
-├── command/
-│   └── command_builder.py # Command generation
-├── processing/
-│   └── insights_engine.py # Analysis
-├── reports/
-│   └── report_generator.py# Reporting
-├── setup/
-│   ├── dependency_manager.py
-│   └── platform_detector.py
-├── update/
-│   └── update_manager.py  # GitHub updates
-├── utils/
-│   ├── version.py
-│   ├── logger.py
-│   └── helpers.py
-└── requirements.txt
+- Blue: active scan
+- Green: completed
+- Orange: stopped
+- Red: failed
+
+## Updates
+
+Update checks are manual. The app does not check GitHub automatically on startup anymore.
+
+To check for updates, use:
+
+```text
+Help > Check for Updates
 ```
 
----
+The updater now expects one uploaded release `.zip` package for each GitHub release.
 
-## ⚙️ Configuration
+Recommended release asset naming:
 
-Configuration is stored in platform-specific locations:
+- `netscan-studio-universal.zip`
 
-- **Windows:** `%APPDATA%\Local\NetScan Studio\config.json`
-- **Linux:** `~/.config/netscan-studio/config.json`
-- **macOS:** `~/Library/Application Support/NetScan Studio/config.json`
+Selection behavior:
 
-Customize:
-- Theme (dark/light)
-- Scanning defaults
-- Nmap arguments
-- Auto-update settings
+- If exactly one uploaded `.zip` asset exists in the release, the app uses it.
+- If multiple uploaded `.zip` assets exist, the app prefers one whose name includes `universal`, `portable`, or `generic`.
+- If no uploaded release zip exists, the app falls back to the GitHub source archive.
+- If the current app directory looks like a development checkout, the updater stages the package but does not overwrite the working tree automatically.
 
----
+## Release Workflow
 
-##  Tutorials
+Keep `tests/` in the repository for development, but do not ship it inside the end-user release zip.
 
-### Running a Quick Scan
-1. Enter IP: `192.168.1.1`
-2. Mode: Quick
-3. Click "Start Scan"
-4. Results appear in ~30 seconds
+Build the first release package with:
 
-### Advanced Nmap Scan
-1. Enter target
-2. Mode: Standard
-3. Enable "Service Detection" & "OS Detection"
-4. Add Nmap scripts (Vulnerability category)
-5. Customize scan type: SYN Scan
-6. Click "Start Scan"
-
-### Deep Analysis
-1. Enter target
-2. Mode: Deep
-3. Tool: Scapy (or auto-selected)
-4. Options: TTL analysis, Firewall detection
-5. Run full pipeline
-
----
-
-##  License
-
-MIT License - Feel free to use and modify
-
----
-
-##  Troubleshooting
-
-### "Nmap not found"
-- **Solution:** Install Nmap from official website and add to PATH
-- **Verify:** Run `nmap --version` in terminal
-
-### "Failed to install packages"
-- **Solution:** Run with admin privileges or use virtual environment
 ```bash
-python -m venv venv
-# Activate venv, then install
+python scripts/build_release.py
 ```
 
-### "Connection refused"
-- **Solution:** Ensure target is reachable
-- **Check:** Ping target first
+This creates:
 
----
+- `dist/netscan-studio-universal/`
+- `dist/netscan-studio-universal.zip`
 
-##  Future Enhancements
+The universal release zip includes the application source and excludes development-only content such as:
 
-- Network graph visualization
-- AI-based scan recommendations
-- Scan history dashboard
-- Integration with ReconVault
-- Custom scan profiles
-- Batch scanning
+- `tests/`
+- `.git/`
+- `dist/`
+- `logs/`
+- `__pycache__/`
+- local virtual environments
 
----
+Suggested first GitHub release flow:
 
-**Happy Scanning! 🔍**
+1. Commit your repo changes.
+2. Push the branch to GitHub.
+3. Create tag `v1.0.0`.
+4. Create a GitHub release for `v1.0.0`.
+5. Upload `dist/netscan-studio-universal.zip` as the release asset.
+
+## Storage Locations
+
+NetScan Studio uses per-user platform directories for runtime data.
+
+### Configuration
+
+- Windows: `%LOCALAPPDATA%\NetScan Studio\config.json`
+- Linux/Kali: `~/.config/netscan-studio/config.json`
+- macOS: `~/Library/Application Support/NetScan Studio/config.json`
+
+### Logs
+
+- Windows: `%LOCALAPPDATA%\NetScan Studio\logs\`
+- Linux/Kali: `${XDG_STATE_HOME:-~/.local/state}/netscan-studio/logs/`
+- macOS: `~/Library/Application Support/NetScan Studio/logs/`
+
+### Generated Reports
+
+- Windows: `%LOCALAPPDATA%\NetScan Studio\reports\`
+- Linux/Kali: `~/.config/netscan-studio/reports/`
+- macOS: `~/Library/Application Support/NetScan Studio/reports/`
+
+## Project Structure
+
+```text
+netscan_studio/
+|-- main.py
+|-- command/
+|-- core/
+|-- engines/
+|-- processing/
+|-- reports/
+|-- setup/
+|-- scripts/
+|-- tests/
+|-- ui/
+|-- update/
+|-- utils/
+|-- LICENSE
+|-- README.md
+`-- requirements.txt
+```
+
+## Troubleshooting
+
+### Nmap not found
+
+- Confirm Nmap is installed.
+- Verify it runs in a terminal with:
+
+```bash
+nmap --version
+```
+
+- On Windows, check that `C:\Program Files\Nmap\` is installed and available to the app.
+
+### Raw scans fall back to TCP Connect
+
+- This is expected when the app is not running with administrator/root privileges.
+- Run the app with elevated privileges if you explicitly need raw packet scan types.
+
+### Scapy analysis fails to start
+
+- Run the app as administrator/root.
+- Make sure packet capture support is available on the OS.
+
+### DNS or update check issues
+
+- Manual update checks require outbound internet access to GitHub.
+
+## Development Notes
+
+- `tests/test_scan_logic.py` contains regression coverage for scan mode and preview behavior.
+- Generated cache and log folders should not be committed.
+- Runtime data is intentionally stored outside the repository when possible.
+
+## License
+
+MIT License. See `LICENSE`.

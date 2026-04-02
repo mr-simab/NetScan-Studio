@@ -2,11 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
 .Python
+
+# Build artifacts
 build/
-develop-eggs/
 dist/
+develop-eggs/
 downloads/
 eggs/
 .eggs/
@@ -20,37 +21,50 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+# Virtual environments
+.venv/
 venv/
-ENV/
 env/
+ENV/
 
-# IDE
+# Test and coverage outputs
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+tests/__pycache__/
+tests/tmp*/
+tests/_update_package_fixture/
+
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Logs
+# Logs and local runtime output
 logs/
 *.log
 nohup.out
 
-# Config
-config.json
-*.ini
-
-# OS
+# OS files
 .DS_Store
 Thumbs.db
 
-# Application
-config/
-data/
-scans/
+# Local configuration and secrets
+.env
+.env.*
+.python-version
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
+# Common temporary files
+*.tmp
+*.temp
+*.bak
+*.orig

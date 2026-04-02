@@ -3,6 +3,7 @@ from typing import List
 from .base_engine import BaseScanEngine, ScanResult, ScanState
 from utils import ValidationHelper
 from utils.logger import get_logger
+from setup import DependencyManager
 
 logger = get_logger("NmapEngine")
 
@@ -13,9 +14,13 @@ class NmapEngine(BaseScanEngine):
     def __init__(self, target: str, args: str = "-sS -sV"):
         super().__init__(target)
         self.args = args
+        self.nmap_path = DependencyManager.find_nmap_path()
 
         try:
-            self.nm = nmap.PortScanner()
+            search_paths = (self.nmap_path,) if self.nmap_path else ('nmap',)
+            self.nm = nmap.PortScanner(nmap_search_path=search_paths)
+            if self.nmap_path:
+                logger.info(f"Using Nmap binary: {self.nmap_path}")
         except Exception as e:
             logger.error(f"Nmap initialization failed: {e}")
             self.nm = None

@@ -11,6 +11,15 @@ logger = get_logger("DependencyManager")
 class DependencyManager:
     """Enhanced dependency manager for NetScan Studio"""
 
+    COMMON_NMAP_PATHS = (
+        r"C:\Program Files\Nmap\nmap.exe",
+        r"C:\Program Files (x86)\Nmap\nmap.exe",
+        "/usr/bin/nmap",
+        "/usr/local/bin/nmap",
+        "/opt/local/bin/nmap",
+        "/opt/homebrew/bin/nmap",
+    )
+
     def __init__(self):
         self.os_name = platform.system()
 
@@ -58,24 +67,24 @@ class DependencyManager:
 
     # ------------------ CHECKERS ------------------ #
 
+    @classmethod
+    def find_nmap_path(cls) -> Optional[str]:
+        """Locate the Nmap executable from PATH or common install locations."""
+        import os
+
+        path = shutil.which("nmap")
+        if path:
+            return path
+
+        for nmap_path in cls.COMMON_NMAP_PATHS:
+            if os.path.exists(nmap_path):
+                return nmap_path
+
+        return None
+
     def _check_nmap(self) -> Tuple[bool, Optional[str]]:
         """Check Nmap installation + version"""
-        import os
-        
-        # First try standard PATH lookup
-        path = shutil.which("nmap")
-        
-        # If not found in PATH, check common Windows installation locations
-        if not path:
-            common_paths = [
-                r"C:\Program Files\Nmap\nmap.exe",
-                r"C:\Program Files (x86)\Nmap\nmap.exe",
-            ]
-            for nmap_path in common_paths:
-                if os.path.exists(nmap_path):
-                    path = nmap_path
-                    break
-        
+        path = self.find_nmap_path()
         if not path:
             return False, None
 
@@ -139,16 +148,18 @@ class DependencyManager:
             "Windows": (
                 "1. Download Nmap: https://nmap.org/download.html\n"
                 "2. Install it\n"
-                "3. Add to PATH\n"
-                "4. Restart app"
+                "3. If Windows asks, also install Npcap\n"
+                "4. Add Nmap to PATH\n"
+                "5. Restart the app"
             ),
             "Linux": (
-                "Ubuntu/Debian: sudo apt install nmap\n"
+                "Ubuntu/Debian/Kali: sudo apt install nmap\n"
                 "RedHat: sudo yum install nmap\n"
-                "Fedora: sudo dnf install nmap"
+                "Fedora: sudo dnf install nmap\n"
+                "Arch: sudo pacman -S nmap"
             ),
             "Darwin": (
-                "brew install nmap\n"
+                "Homebrew: brew install nmap\n"
                 "or download from https://nmap.org"
             )
         }
