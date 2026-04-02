@@ -247,12 +247,6 @@ nmap --version
 
 - Manual update checks require outbound internet access to GitHub.
 
-## Development Notes
-
-- `tests/test_scan_logic.py` contains regression coverage for scan mode and preview behavior.
-- Generated cache and log folders should not be committed.
-- Runtime data is intentionally stored outside the repository when possible.
-
 ## License
 
 MIT License. See `LICENSE`.
