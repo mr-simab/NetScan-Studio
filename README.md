@@ -1,6 +1,6 @@
 # NetScan Studio
 
-NetScan Studio is a desktop network scanning application built with Python and PyQt5. It combines Socket, Nmap, and Scapy based workflows behind one GUI, with live progress, command preview, configurable scan modes, and exportable reports.
+NetScan Studio is a network scanning application built with Python and PyQt5. It combines Socket, Nmap, and Scapy based workflows behind one GUI, with live progress, command preview, configurable scan modes, and exportable reports.
 
 ## Preview
 
