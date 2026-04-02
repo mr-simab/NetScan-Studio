@@ -177,38 +177,6 @@ Selection behavior:
 - If no uploaded release zip exists, the app falls back to the GitHub source archive.
 - If the current app directory looks like a development checkout, the updater stages the package but does not overwrite the working tree automatically.
 
-## Release Workflow
-
-Keep `tests/` in the repository for development, but do not ship it inside the end-user release zip.
-
-Build the first release package with:
-
-```bash
-python scripts/build_release.py
-```
-
-This creates:
-
-- `dist/netscan-studio-universal/`
-- `dist/netscan-studio-universal.zip`
-
-The universal release zip includes the application source and excludes development-only content such as:
-
-- `tests/`
-- `.git/`
-- `dist/`
-- `logs/`
-- `__pycache__/`
-- local virtual environments
-
-Suggested first GitHub release flow:
-
-1. Commit your repo changes.
-2. Push the branch to GitHub.
-3. Create tag `v1.0.0`.
-4. Create a GitHub release for `v1.0.0`.
-5. Upload `dist/netscan-studio-universal.zip` as the release asset.
-
 ## Storage Locations
 
 NetScan Studio uses per-user platform directories for runtime data.
