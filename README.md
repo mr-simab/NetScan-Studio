@@ -166,16 +166,6 @@ Help > Check for Updates
 
 The updater now expects one uploaded release `.zip` package for each GitHub release.
 
-Recommended release asset naming:
-
-- `netscan-studio-universal.zip`
-
-Selection behavior:
-
-- If exactly one uploaded `.zip` asset exists in the release, the app uses it.
-- If multiple uploaded `.zip` assets exist, the app prefers one whose name includes `universal`, `portable`, or `generic`.
-- If no uploaded release zip exists, the app falls back to the GitHub source archive.
-- If the current app directory looks like a development checkout, the updater stages the package but does not overwrite the working tree automatically.
 
 ## Storage Locations
 
